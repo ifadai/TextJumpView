@@ -112,8 +112,10 @@ class TextJumpView : View {
         var textBean = mTextList[mCurrentTextIndex]
         mShadowPaint.color = textBean.color
 
+        // 起始点xy
         var shadowX = width / 2F - mCurrentShadowWidth / 2F
         var shadowY = height - mShadowHeight
+
         var rectF = RectF(shadowX, shadowY, shadowX + mCurrentShadowWidth, shadowY + mShadowHeight)
         canvas.drawOval(rectF, mShadowPaint)
     }
@@ -230,13 +232,6 @@ class TextJumpView : View {
 
         mTextAreaWidth = w
         mTextAreaHeight = h
-    }
-
-    // 获取文字区域
-    fun getTextArea(text: String): Rect {
-        val rect = Rect()
-        mTextPaint.getTextBounds(text, 0, text.length, rect)
-        return rect
     }
 
     /**

@@ -25,11 +25,11 @@ class TestActivity : AppCompatActivity() {
         setContentView(R.layout.activity_test)
         tcl.setTextList(
             arrayListOf(
-                TextBean("中", 0xFF009925.toInt()),
-                TextBean("国", 0xFFEEB211.toInt()),
-                TextBean("好", 0xFF3369E8.toInt()),
-                TextBean("邻", 0xFFD50F25.toInt()),
-                TextBean("居", 0xFF9932CD.toInt())
+                TextBean("这", 0xFF009925.toInt()),
+                TextBean("是", 0xFFEEB211.toInt()),
+                TextBean("加", 0xFF3369E8.toInt()),
+                TextBean("载", 0xFFD50F25.toInt()),
+                TextBean("框", 0xFF9932CD.toInt())
             )
         )
         tcl.setTextSize(SizeUtils.dp2px(this, 21F).toFloat())
