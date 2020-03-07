@@ -10,6 +10,8 @@ import android.view.View
 import android.view.animation.AccelerateInterpolator
 import androidx.core.animation.addListener
 import com.gz.goodneighbor.widget.loading.TextBean
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
 
 /**
  * 作者：miaoyongyong on 2020/3/7 10:33
@@ -23,7 +25,7 @@ class TextJumpView : View {
     // 文字列表
     private var mTextList: MutableList<TextBean> = ArrayList()
     // 文字大小
-    private var mTextSize = 0F
+    private var mTextSize = SizeUtils.dp2px(context, 16F).toFloat()
 
     // 当前第几个文字
     private var mCurrentTextIndex = 0
@@ -35,18 +37,18 @@ class TextJumpView : View {
     private var mCurrentRotateAngle = 0F
     // 文字可活动的最大高度
     private var mTextOffsetMaxH = 0F
-    // 当前距离顶部的高度
+    // 文字当前距离顶部的高度
     private var mCurrentOffsetH = 0F
     // 当前文字区域的宽高
-    private var mTextAreaHeight = 0
-    private var mTextAreaWidth = 0
+    private var mTextAreaHeight = 0F
+    private var mTextAreaWidth = 0F
 
     // 阴影最大宽
     private var mShadowMaxWidth = SizeUtils.dp2px(context, 28F).toFloat()
     // 阴影最小宽
-    private var mShadowMinWidth = SizeUtils.dp2px(context, 10F).toFloat()
+    private var mShadowMinWidth = SizeUtils.dp2px(context, 8F).toFloat()
     // 阴影高度
-    private val mShadowHeight = SizeUtils.dp2px(context, 8F).toFloat()
+    private val mShadowHeight = SizeUtils.dp2px(context, 6F).toFloat()
     // 阴影当前宽度
     private var mCurrentShadowWidth = 0F
 
@@ -55,7 +57,9 @@ class TextJumpView : View {
     // 阴影画笔
     private var mShadowPaint: Paint = Paint()
 
+    // 文字上升动画
     private var mUpAnimator: ValueAnimator? = null
+    // 文字下降动画
     private var mDownAnimator: ValueAnimator? = null
 
     constructor(context: Context?) : super(context)
@@ -67,17 +71,11 @@ class TextJumpView : View {
     )
 
     init {
-        mTextSize = SizeUtils.dp2px(context, 16F).toFloat()
         mTextPaint.isAntiAlias = true
         mTextPaint.isFakeBoldText = true
         mTextPaint.textSize = mTextSize
 
         mShadowPaint.isAntiAlias = true
-        mShadowPaint.color = Color.GRAY
-    }
-
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -86,7 +84,8 @@ class TextJumpView : View {
         drawShadow(canvas)
     }
 
-    fun drawText(canvas: Canvas) {
+    // 绘制文字
+    private fun drawText(canvas: Canvas) {
         if (mCurrentTextIndex >= mTextList.size)
             return
         var textBean = mTextList[mCurrentTextIndex]
@@ -108,7 +107,8 @@ class TextJumpView : View {
         canvas.rotate(-mCurrentRotateAngle, rotateCenterX.toFloat(), rotateCenterY.toFloat())
     }
 
-    fun drawShadow(canvas: Canvas) {
+    // 绘制阴影
+    private fun drawShadow(canvas: Canvas) {
         var textBean = mTextList[mCurrentTextIndex]
         mShadowPaint.color = textBean.color
 
@@ -123,17 +123,20 @@ class TextJumpView : View {
         mTextOffsetMaxH = h - mShadowHeight - mTextSize
     }
 
+    // 设置文字列表
     fun setTextList(textList: List<TextBean>) {
         mTextList.clear()
         mTextList.addAll(textList)
     }
 
+    // 设置文字大小
     fun setTextSize(textSize: Float) {
         mTextSize = textSize
         mTextPaint.textSize = mTextSize
         mTextOffsetMaxH = height - mShadowHeight - mTextSize
     }
 
+    // 开始动画
     fun start() {
         if (mTextList.size == 0) {
             return
@@ -141,8 +144,8 @@ class TextJumpView : View {
         mCurrentTextIndex = 0
 
         mUpAnimator = ValueAnimator.ofFloat(0F, 1F)
-        mUpAnimator?.duration = 900
-        mUpAnimator?.interpolator = AccelerateInterpolator()
+        mUpAnimator?.duration = 600
+//        mUpAnimator?.interpolator = AccelerateInterpolator()
         mUpAnimator?.addUpdateListener {
             var value = it.animatedValue as Float
             Log.d(TAG, "value=$value")
@@ -169,7 +172,7 @@ class TextJumpView : View {
         })
 
         mDownAnimator = ValueAnimator.ofFloat(0F, 1F)
-        mDownAnimator?.duration = 800
+        mDownAnimator?.duration = 500
         mDownAnimator?.interpolator = AccelerateInterpolator()
         mDownAnimator?.startDelay = 100
         mDownAnimator?.addUpdateListener {
@@ -208,6 +211,7 @@ class TextJumpView : View {
 
     }
 
+    // 动画开始前的初始化
     private fun startAnimForInit() {
         getTextAreaSize()
         if (mCurrentTextIndex % 2 == 0) {// 偶数
@@ -217,12 +221,18 @@ class TextJumpView : View {
         }
     }
 
+    // 获取文字区域的大小，并赋值
     fun getTextAreaSize() {
-        var rect = getTextArea(mTextList.get(mCurrentTextIndex).text)
-        mTextAreaWidth = rect.width()
-        mTextAreaHeight = rect.height()
+        var w = mTextPaint.measureText(mTextList.get(mCurrentTextIndex).text);
+        val fm = mTextPaint.getFontMetrics()
+        //文字基准线的下部距离-文字基准线的上部距离 = 文字高度
+        var h = fm.descent - fm.ascent
+
+        mTextAreaWidth = w
+        mTextAreaHeight = h
     }
 
+    // 获取文字区域
     fun getTextArea(text: String): Rect {
         val rect = Rect()
         mTextPaint.getTextBounds(text, 0, text.length, rect)
@@ -241,4 +251,9 @@ class TextJumpView : View {
         return (fontMetrics.descent - fontMetrics.ascent) / 2 - fontMetrics.descent
     }
 
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        if (mUpAnimator?.isRunning == true) mUpAnimator?.cancel()
+        if (mDownAnimator?.isRunning == true) mDownAnimator?.cancel()
+    }
 }

@@ -21,8 +21,8 @@
 
             <com.fadai.textjumpview.TextJumpView
                 android:id="@+id/tcl"
-                android:layout_width="96dp"
-                android:layout_height="88dp"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
                 android:layout_marginTop="5dp"
                 android:background="#FFFFFFFF"
                 app:layout_constraintEnd_toEndOf="parent"
