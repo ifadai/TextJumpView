@@ -29,8 +29,6 @@ class TextJumpView : View {
 
     // 当前第几个文字
     private var mCurrentTextIndex = 0
-    // 最大旋转角度（绝对值
-    private var mMaxRotateAngle = 360F
     // 当前最大旋转角度
     private var mCurrentMaxRotateAngle = 360F
     // 当前旋转到多少度
@@ -42,15 +40,15 @@ class TextJumpView : View {
     // 当前文字区域的宽高
     private var mTextAreaHeight = 0F
     private var mTextAreaWidth = 0F
-
-    // 阴影最大宽
-    private var mShadowMaxWidth = SizeUtils.dp2px(context, 28F).toFloat()
-    // 阴影最小宽
-    private var mShadowMinWidth = SizeUtils.dp2px(context, 8F).toFloat()
-    // 阴影高度
-    private val mShadowHeight = SizeUtils.dp2px(context, 6F).toFloat()
     // 阴影当前宽度
     private var mCurrentShadowWidth = 0F
+
+    // 阴影最大宽
+    private val SHADOW_MAX_WIDTH = SizeUtils.dp2px(context, 28F).toFloat()
+    // 阴影最小宽
+    private val SHADOW_MIN_WIDTH = SizeUtils.dp2px(context, 8F).toFloat()
+    // 阴影高度
+    private val SHADOW_HEIGHT = SizeUtils.dp2px(context, 6F).toFloat()
 
     // 文字画笔
     private var mTextPaint: Paint = Paint()
@@ -114,15 +112,15 @@ class TextJumpView : View {
 
         // 起始点xy
         var shadowX = width / 2F - mCurrentShadowWidth / 2F
-        var shadowY = height - mShadowHeight
+        var shadowY = height - SHADOW_HEIGHT
 
-        var rectF = RectF(shadowX, shadowY, shadowX + mCurrentShadowWidth, shadowY + mShadowHeight)
+        var rectF = RectF(shadowX, shadowY, shadowX + mCurrentShadowWidth, shadowY + SHADOW_HEIGHT)
         canvas.drawOval(rectF, mShadowPaint)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        mTextOffsetMaxH = h - mShadowHeight - mTextSize
+        mTextOffsetMaxH = h - SHADOW_HEIGHT - mTextSize
     }
 
     // 设置文字列表
@@ -135,7 +133,7 @@ class TextJumpView : View {
     fun setTextSize(textSize: Float) {
         mTextSize = textSize
         mTextPaint.textSize = mTextSize
-        mTextOffsetMaxH = height - mShadowHeight - mTextSize
+        mTextOffsetMaxH = height - SHADOW_HEIGHT - mTextSize
     }
 
     // 开始动画
@@ -151,10 +149,13 @@ class TextJumpView : View {
         mUpAnimator?.addUpdateListener {
             var value = it.animatedValue as Float
             Log.d(TAG, "value=$value")
+            // 旋转角度
             mCurrentRotateAngle = mCurrentMaxRotateAngle * value
+            // 当前偏移量
             mCurrentOffsetH = mTextOffsetMaxH * (1 - value)
+            // 阴影宽度
             mCurrentShadowWidth =
-                mShadowMinWidth + (mShadowMaxWidth - mShadowMinWidth) * value
+                SHADOW_MIN_WIDTH + (SHADOW_MAX_WIDTH - SHADOW_MIN_WIDTH) * value
             postInvalidate()
         }
         mUpAnimator?.addListener(object : Animator.AnimatorListener {
@@ -179,11 +180,14 @@ class TextJumpView : View {
         mDownAnimator?.startDelay = 100
         mDownAnimator?.addUpdateListener {
             var value = it.animatedValue as Float
+
+            // 旋转角度
             mCurrentRotateAngle = 0F
-//            mCurrentRotateAngle = mCurrentMaxRotateAngle * (1 - value)
+            // 当前偏移量
             mCurrentOffsetH = mTextOffsetMaxH * value
+            // 阴影宽度
             mCurrentShadowWidth =
-                mShadowMinWidth + (mShadowMaxWidth - mShadowMinWidth) * (1 - value)
+                SHADOW_MIN_WIDTH + (SHADOW_MAX_WIDTH - SHADOW_MIN_WIDTH) * (1 - value)
             postInvalidate()
         }
         mDownAnimator?.addListener(object : Animator.AnimatorListener {
@@ -217,9 +221,9 @@ class TextJumpView : View {
     private fun startAnimForInit() {
         getTextAreaSize()
         if (mCurrentTextIndex % 2 == 0) {// 偶数
-            mCurrentMaxRotateAngle = mMaxRotateAngle
+            mCurrentMaxRotateAngle = 360F
         } else {// 奇数
-            mCurrentMaxRotateAngle = -mMaxRotateAngle
+            mCurrentMaxRotateAngle = -360F
         }
     }
 
